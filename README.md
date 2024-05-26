@@ -1,1 +1,2 @@
-# Daily
+# Daily 
+The "Daily" just a English study note.If I get ACT or AP score or I need to change learn Korean or Japanese I will change this note language.Yeah I study Music and Compute Science knowledge now.
