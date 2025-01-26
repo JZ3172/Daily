@@ -1,0 +1,1 @@
+The Frist novel of myself.Use [[English Study note]]for everyone to understand 
