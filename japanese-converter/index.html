@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Romaji to Japanese Converter</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+        .converter-container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+        h1 {
+            margin-top: 0;
+            color: #1c1e21;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        p {
+            color: #606770;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+        textarea {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border-radius: 8px;
+            border: 1px solid #dddfe2;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+            resize: vertical;
+            min-height: 100px;
+        }
+        #output {
+            background-color: #f0f2f5;
+            font-size: 24px;
+            min-height: 120px;
+            white-space: pre-wrap;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="converter-container">
+        <h1>Romaji to Japanese Converter</h1>
+        <p>Start typing in Romaji below to see it converted to Japanese in real-time.</p>
+        <textarea id="input" placeholder="Type Romaji here... (e.g., 'konnichiwa')"></textarea>
+        <textarea id="output" readonly placeholder="日本語"></textarea>
+    </div>
+
+    <script>
+        const romajiToHiragana = {
+            'a': 'あ', 'i': 'い', 'u': 'う', 'e': 'え', 'o': 'お',
+            'ka': 'か', 'ki': 'き', 'ku': 'く', 'ke': 'け', 'ko': 'こ',
+            'sa': 'さ', 'shi': 'し', 'su': 'す', 'se': 'せ', 'so': 'そ',
+            'ta': 'た', 'chi': 'ち', 'tsu': 'つ', 'te': 'て', 'to': 'と',
+            'na': 'な', 'ni': 'に', 'nu': 'ぬ', 'ne': 'ね', 'no': 'の',
+            'ha': 'は', 'hi': 'ひ', 'fu': 'ふ', 'he': 'へ', 'ho': 'ほ',
+            'ma': 'ま', 'mi': 'み', 'mu': 'む', 'me': 'め', 'mo': 'も',
+            'ya': 'や', 'yu': 'ゆ', 'yo': 'よ',
+            'ra': 'ら', 'ri': 'り', 'ru': 'る', 're': 'れ', 'ro': 'ろ',
+            'wa': 'わ', 'wo': 'を', 'n': 'ん',
+            'ga': 'が', 'gi': 'ぎ', 'gu': 'ぐ', 'ge': 'げ', 'go': 'ご',
+            'za': 'ざ', 'ji': 'じ', 'zu': 'ず', 'ze': 'ぜ', 'zo': 'ぞ',
+            'da': 'だ', 'di': 'ぢ', 'du': 'づ', 'de': 'で', 'do': 'ど',
+            'ba': 'ば', 'bi': 'び', 'bu': 'ぶ', 'be': 'べ', 'bo': 'ぼ',
+            'pa': 'ぱ', 'pi': 'ぴ', 'pu': 'ぷ', 'pe': 'ぺ', 'po': 'ぽ',
+            'kya': 'きゃ', 'kyu': 'きゅ', 'kyo': 'きょ',
+            'sha': 'しゃ', 'shu': 'しゅ', 'sho': 'しょ',
+            'cha': 'ちゃ', 'chu': 'ちゅ', 'cho': 'ちょ',
+            'nya': 'にゃ', 'nyu': 'にゅ', 'nyo': 'にょ',
+            'hya': 'ひゃ', 'hyu': 'ひゅ', 'hyo': 'ひょ',
+            'mya': 'みゃ', 'myu': 'みゅ', 'myo': 'みょ',
+            'rya': 'りゃ', 'ryu': 'りゅ', 'ryo': 'りょ',
+            'gya': 'ぎゃ', 'gyu': 'ぎゅ', 'gyo': 'ぎょ',
+            'ja': 'じゃ', 'ju': 'じゅ', 'jo': 'じょ',
+            'bya': 'びゃ', 'byu': 'びゅ', 'byo': 'びょ',
+            'pya': 'ぴゃ', 'pyu': 'ぴゅ', 'pyo': 'ぴょ',
+            'kka': 'っか', 'kki': 'っき', 'kku': 'っく', 'kke': 'っけ', 'kko': 'っこ',
+            'ssa': 'っさ', 'sshi': 'っし', 'ssu': 'っす', 'sse': 'っせ', 'sso': 'っそ',
+            'tta': 'った', 'tchi': 'っち', 'ttsu': 'っつ', 'tte': 'って', 'tto': 'っと',
+            'ppa': 'っぱ', 'ppi': 'っぴ', 'ppu': 'っぷ', 'ppe': 'っぺ', 'ppo': 'っぽ',
+            '-': 'ー',
+        };
+
+        const inputArea = document.getElementById('input');
+        const outputArea = document.getElementById('output');
+
+        inputArea.addEventListener('input', () => {
+            let inputText = inputArea.value.toLowerCase();
+            let outputText = '';
+            let buffer = '';
+
+            for (let i = 0; i < inputText.length; i++) {
+                buffer += inputText[i];
+
+                if (romajiToHiragana[buffer]) {
+                    // Handle 'n' case
+                    if (buffer === 'n' && i + 1 < inputText.length && !'aiueoy'.includes(inputText[i+1])) {
+                         // it's a standalone 'n'
+                    } else if (buffer === 'n' && i + 1 === inputText.length) {
+                        // end of string
+                    }
+                    else {
+                        outputText += romajiToHiragana[buffer];
+                        buffer = '';
+                        continue;
+                    }
+                }
+                
+                // check for double consonants (sokuon)
+                if (buffer.length > 1 && buffer[0] === buffer[1] && !'aiueon'.includes(buffer[0])) {
+                    outputText += 'っ';
+                    buffer = buffer.slice(1);
+                }
+
+                let found = false;
+                for (let j = Math.min(3, buffer.length); j > 0; j--) {
+                    const sub = buffer.slice(buffer.length - j);
+                    if (romajiToHiragana[sub]) {
+                        const pre = buffer.slice(0, buffer.length - j);
+                        outputText += convertBuffer(pre);
+                        outputText += romajiToHiragana[sub];
+                        buffer = '';
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            outputText += convertBuffer(buffer);
+            outputArea.value = outputText;
+        });
+
+        function convertBuffer(buffer) {
+            let converted = '';
+            let temp = '';
+            for (let char of buffer) {
+                temp += char;
+                if (romajiToHiragana[temp]) {
+                    converted += romajiToHiragana[temp];
+                    temp = '';
+                }
+            }
+            return converted + temp;
+        }
+    </script>
+</body>
+</html>
